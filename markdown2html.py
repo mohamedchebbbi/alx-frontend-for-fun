@@ -1,49 +1,43 @@
 #!/usr/bin/python3
-
+'''
+A script that codes markdown to HTML
+'''
 import sys
-import os.path
+import os
 import re
 
 if __name__ == '__main__':
-    arg = sys.argv
 
-    if len(arg) < 3:
-        print("Usage: ./markdown2html.py README.md README.html",
+    # Test that the number of arguments passed is 2
+    if len(sys.argv[1:]) != 2:
+        print('Usage: ./markdown2html.py README.md README.html',
               file=sys.stderr)
         sys.exit(1)
 
-    markdown_file = arg[1]
-    output_file_name = arg[2]
+    # Store the arguments into variables
+    input_file = sys.argv[1]
+    output_file = sys.argv[2]
 
-    if not os.path.isfile(markdown_file):
-        print(f"Missing {markdown_file}", file=sys.stderr)
+    # Checks that the markdown file exists and is a file
+    if not (os.path.exists(input_file) and os.path.isfile(input_file)):
+        print(f'Missing {input_file}', file=sys.stderr)
         sys.exit(1)
 
-    with open(markdown_file, mode="r") as f:
-        content = f.read()
+    with open(input_file, encoding='utf-8') as file_1:
+        html_content = []
+        md_content = [line[:-1] for line in file_1.readlines()]
+        for line in md_content:
+            heading = re.split(r'#{1,6} ', line)
+            if len(heading) > 1:
+                # Compute the number of the # present to
+                # determine heading level
+                h_level = len(line[:line.find(heading[1])-1])
+                # Append the html equivalent of the heading
+                html_content.append(
+                    f'<h{h_level}>{heading[1]}</h{h_level}>\n'
+                )
+            else:
+                html_content.append(line)
 
-    # MARKDOWN TO HTML HEADINGS
-    markdown_headings = re.compile(r"^(#{1,6})\s+(.*)$", flags=re.MULTILINE)
-    html_headings = markdown_headings.sub(
-        lambda m: f"<h{len(m.group(1))}>{m.group(2)}</h{len(m.group(1))}>",
-        content
-    )
-
-    # MARKDOWN TO HTML UNORDERED LISTS
-    unordered_listing = re.compile(r"^\s*-\s+(.*)$", flags=re.MULTILINE)
-    matches = unordered_listing.findall(content)
-    html_unordered_lists = ""
-    if matches:
-        html_unordered_lists = "<ul>\n"
-        for match in matches:
-            html_unordered_lists += f"    <li>{match}</li>\n"
-        html_unordered_lists += "</ul>"
-
-    # Combine HTML content from both processes
-    html_content = html_headings + '\n' + html_unordered_lists
-
-    # Write the HTML content to the output file
-    with open(output_file_name, mode="w") as f:
-        f.write(html_content)
-
-    sys.exit(0)
+    with open(output_file, 'w', encoding='utf-8') as file_2:
+        file_2.writelines(html_content)
