@@ -659,13 +659,13 @@ html{line-height:1.15;-webkit-text-size-adjust:100%}body{margin:0}main{display:b
       }
 /* Basic form
     ============================= */
-    .form{
+    form{
         display:flex;
         flex-direction:column;
         padding: 1rem 0;
         margin:0;
     }
-    .fieldset{
+    fieldset{
         display: flex;
         flex-direction:column;
         justify-content: flex-start;
